@@ -20,7 +20,7 @@ function App() {
     if (isAuthenticated) {
       return (
         <div className="flex items-center gap-4">
-          <span className="font-medium text-black">{user?.email}</span>
+          <span className="font-medium text-black">{user?.email?.split("@")[0]}</span>
           <button className="btn btn-secondary" onClick={logout}>
             Logout
           </button>

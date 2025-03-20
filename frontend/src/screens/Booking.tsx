@@ -8,11 +8,15 @@ const Booking = () => {
   const { user } = useAuth();
   const bookingState = location.state as { planName: string; price: string } | null;
 
+  // Services available for selection
+  const services = ["PackUp", "Secure Store", "Full Move", "Custom Plan"];
+
+  // State for the selected service and form data
+  const [selectedService, setSelectedService] = useState(bookingState?.planName || services[0]);
   const [formData, setFormData] = useState({
     address: "",
     addressDetails: "",
     phone: "",
-    specialInstructions: "",
   });
 
   React.useEffect(() => {
@@ -27,9 +31,9 @@ const Booking = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Booking submitted:", { ...formData, plan: bookingState });
+    console.log("Inspection request submitted:", { ...formData, selectedService });
 
-    alert("Booking confirmed! 🎉");
+    alert("Inspection request submitted! 🎉");
 
     setTimeout(() => {
       navigate("/");
@@ -38,14 +42,35 @@ const Booking = () => {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Complete Your Booking</h1>
+      <h1 className="text-3xl font-bold mb-8">Request Your Inspection</h1>
 
       <div className="bg-white p-6 rounded-xl shadow-sm border border-border-gray mb-8">
-        <h2 className="text-xl font-semibold mb-2">Selected Plan: {bookingState.planName}</h2>
-        <p className="text-2xl font-bold text-primary">{bookingState.price}</p>
+        <h2 className="text-xl font-semibold mb-2">Requested Service: {selectedService}</h2>
+        <p className="text-lg text-gray-700">
+          We will inspect your dorm or apartment room and provide you with an accurate cost for the requested service.
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-sm border border-border-gray">
+        <div className="mb-6">
+          <label htmlFor="service" className="block mb-2 font-medium">
+            Select Service
+          </label>
+          <select
+            id="service"
+            value={selectedService}
+            onChange={(e) => setSelectedService(e.target.value)}
+            className="form-input"
+            required
+          >
+            {services.map((service) => (
+              <option key={service} value={service}>
+                {service}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="mb-6">
           <label htmlFor="address" className="block mb-2 font-medium">
             Address
@@ -90,24 +115,11 @@ const Booking = () => {
           />
         </div>
 
-        <div className="mb-6">
-          <label htmlFor="specialInstructions" className="block mb-2 font-medium">
-            Special Instructions
-          </label>
-          <textarea
-            id="specialInstructions"
-            placeholder="Any special instructions or requirements"
-            value={formData.specialInstructions}
-            onChange={(e) => setFormData({ ...formData, specialInstructions: e.target.value })}
-            className="w-full min-h-[120px] p-3 border border-border-gray rounded-lg resize-y focus:outline-none focus:border-primary focus:bg-light-primary"
-          />
-        </div>
-
         <button
           type="submit"
           className="w-full py-3 px-4 bg-primary text-white font-medium rounded-lg hover:bg-opacity-90 transition-all"
         >
-          Confirm Booking
+          Request Inspection
         </button>
       </form>
     </div>
