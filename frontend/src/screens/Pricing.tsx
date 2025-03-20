@@ -1,12 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import AuthModal from "../components/AuthModal";
 
 const Pricing = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const plans = [
     {
@@ -72,7 +70,7 @@ const Pricing = () => {
 
   const handlePlanSelect = (plan: any) => {
     if (!user) {
-      setShowAuthModal(true);
+      navigate("/login");
       return;
     }
 
@@ -85,29 +83,45 @@ const Pricing = () => {
   };
 
   return (
-    <div className="pricing-container">
-      <h1>Storage Solutions</h1>
-      <p className="pricing-subtitle">Choose the service that fits your needs</p>
-      <div className="pricing-grid">
+    <div className="py-16 px-4 text-center">
+      <h1 className="text-4xl md:text-5xl font-semibold mb-4">Storage Solutions</h1>
+      <p className="text-xl text-text-gray mb-12 max-w-2xl mx-auto">Choose the service that fits your needs</p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
         {plans.map((plan) => (
-          <div key={plan.name} className={`pricing-card ${plan.recommended ? "recommended" : ""}`}>
-            {plan.recommended && <div className="recommended-badge">Most Popular</div>}
-            <h2>{plan.name}</h2>
-            <div className="price">
-              ~{plan.price}
-              {!plan.isCustom && <span className="price-period">/year</span>}
+          <div
+            key={plan.name}
+            className={`bg-white rounded-xl border ${
+              plan.recommended ? "border-primary border-2 shadow-lg transform md:scale-105" : "border-border-gray"
+            } 
+                       flex flex-col p-6 relative transition-all duration-300 hover:border-primary`}
+          >
+            {plan.recommended && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium">
+                Most Popular
+              </div>
+            )}
+
+            <h2 className="text-2xl font-medium mb-4">{plan.name}</h2>
+
+            <div className="flex items-baseline justify-center gap-1 mb-2">
+              <span className="text-lg">~{plan.price}</span>
+              {!plan.isCustom && <span className="text-text-gray">/year</span>}
             </div>
-            <p className="plan-description">{plan.description}</p>
-            <ul className="feature-list">
+
+            <p className="text-text-gray mb-6 text-sm">{plan.description}</p>
+
+            <ul className="text-left text-sm mb-8 flex-grow">
               {plan.features.map((feature) => (
-                <li key={feature}>
-                  <span className="check-icon">✓</span>
-                  {feature}
+                <li key={feature} className="mb-3 flex items-start">
+                  <span className="text-primary font-bold mr-2">✓</span>
+                  <span>{feature}</span>
                 </li>
               ))}
             </ul>
+
             <button
-              className={`btn ${plan.isCustom ? "btn-secondary" : "btn-primary"}`}
+              className={`btn ${plan.isCustom ? "btn-secondary" : "btn-primary"} mt-auto`}
               onClick={() => handlePlanSelect(plan)}
             >
               {plan.isCustom ? "Contact Us" : "Select Plan"}
@@ -115,10 +129,6 @@ const Pricing = () => {
           </div>
         ))}
       </div>
-
-      {showAuthModal && (
-        <AuthModal type="login" onClose={() => setShowAuthModal(false)} onSuccess={() => navigate("/booking")} />
-      )}
     </div>
   );
 };

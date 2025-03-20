@@ -1,33 +1,27 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import "./App.css";
 import { useAuth } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Component imports
 import Home from "./screens/Home";
 import Pricing from "./screens/Pricing";
 import AboutUs from "./screens/AboutUs";
 import Booking from "./screens/Booking";
-import AuthModal from "./components/AuthModal";
+import Login from "./screens/Login";
+import Register from "./screens/Register";
 import MobileNav from "./components/MobileNav";
 
 function App() {
-  const { user, logout } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authType, setAuthType] = useState<"login" | "signup">("login");
+  const { isAuthenticated, logout, user } = useAuth();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  const openModal = (type: "login" | "signup") => {
-    setAuthType(type);
-    setShowAuthModal(true);
-  };
-
   const renderAuthButtons = () => {
-    if (user) {
+    if (isAuthenticated) {
       return (
-        <div className="user-info">
-          <span className="user-email">{user.email}</span>
-          <button onClick={logout} className="btn btn-secondary">
+        <div className="flex items-center gap-4">
+          <span className="font-medium text-black">{user?.email}</span>
+          <button className="btn btn-secondary" onClick={logout}>
             Logout
           </button>
         </div>
@@ -35,61 +29,81 @@ function App() {
     }
 
     return (
-      <div className="auth-buttons">
-        <button onClick={() => openModal("login")} className="btn btn-secondary">
+      <div className="flex gap-4">
+        <Link to="/login" className="btn btn-secondary">
           Login
-        </button>
-        <button onClick={() => openModal("signup")} className="btn btn-primary">
-          Sign Up
-        </button>
+        </Link>
+        <Link to="/register" className="btn btn-primary">
+          Register
+        </Link>
       </div>
     );
   };
 
   return (
     <Router>
-      <div className="App">
-        <nav className="navbar">
-          <div className="nav-container">
-            <div className="nav-brand">
-              <span className="brand-icon">📦</span> GT PackUp
-            </div>
+      <div className="min-h-screen flex flex-col">
+        <nav className="bg-white border-b border-border-gray">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center h-20">
+              <div className="flex items-center">
+                <Link to="/" className="flex items-center gap-2">
+                  <span className="text-2xl">📦</span>
+                  <span className="text-xl font-semibold text-primary">GT PackUp</span>
+                </Link>
+              </div>
 
-            {/* Desktop Navigation - Updated order */}
-            <div className="nav-links desktop-nav">
-              <Link to="/" className="nav-link">
-                Home
-              </Link>
-              <Link to="/pricing" className="nav-link">
-                Pricing
-              </Link>
-              <Link to="/about" className="nav-link">
-                About Us
-              </Link>
-              {renderAuthButtons()}
-            </div>
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center gap-8">
+                <Link to="/" className="nav-link">
+                  Home
+                </Link>
+                <Link to="/pricing" className="nav-link">
+                  Pricing
+                </Link>
+                <Link to="/about" className="nav-link">
+                  About Us
+                </Link>
+                {renderAuthButtons()}
+              </div>
 
-            {/* Mobile Hamburger Button */}
-            <button className="mobile-menu-btn" onClick={() => setIsMobileNavOpen(true)}>
-              <span></span>
-              <span></span>
-              <span></span>
-            </button>
+              {/* Mobile Hamburger Button */}
+              <button className="md:hidden p-2" onClick={() => setIsMobileNavOpen(true)}>
+                <div className="w-6 h-5 flex flex-col justify-between">
+                  <span className="w-full h-0.5 bg-black"></span>
+                  <span className="w-full h-0.5 bg-black"></span>
+                  <span className="w-full h-0.5 bg-black"></span>
+                </div>
+              </button>
+            </div>
           </div>
         </nav>
 
-        <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} onAuthClick={openModal} />
+        <MobileNav
+          isOpen={isMobileNavOpen}
+          onClose={() => setIsMobileNavOpen(false)}
+          isAuthenticated={isAuthenticated}
+          user={user}
+          onLogout={logout}
+        />
 
-        <main className="main-content">
+        <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/booking" element={<Booking />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/booking"
+              element={
+                <ProtectedRoute>
+                  <Booking />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
-
-        {showAuthModal && <AuthModal type={authType} onClose={() => setShowAuthModal(false)} />}
       </div>
     </Router>
   );
