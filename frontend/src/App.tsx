@@ -10,6 +10,7 @@ import AboutUs from "./screens/AboutUs";
 import Booking from "./screens/Booking";
 import Login from "./screens/Login";
 import Register from "./screens/Register";
+import Profile from "./screens/Profile";
 import MobileNav from "./components/MobileNav";
 
 function App() {
@@ -20,10 +21,9 @@ function App() {
     if (isAuthenticated) {
       return (
         <div className="flex items-center gap-4">
-          <span className="font-medium text-black">{user?.email?.split("@")[0]}</span>
-          <button className="btn btn-secondary" onClick={logout}>
-            Logout
-          </button>
+          <Link to="/profile" className="btn btn-primary w-14 rounded-full text-xl">
+            {user?.email.charAt(0).toUpperCase()}
+          </Link>
         </div>
       );
     }
@@ -64,6 +64,11 @@ function App() {
                 <Link to="/about" className="nav-link">
                   About Us
                 </Link>
+                {isAuthenticated && (
+                  <Link to="/booking" className="nav-link text-primary font-bold">
+                    My Service
+                  </Link>
+                )}
                 {renderAuthButtons()}
               </div>
 
@@ -99,6 +104,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Booking />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
                 </ProtectedRoute>
               }
             />

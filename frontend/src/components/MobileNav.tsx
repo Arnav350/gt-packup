@@ -44,19 +44,22 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose, isAuthenticated,
                 About Us
               </Link>
 
+              {isAuthenticated && (
+                <Link
+                  to="/booking"
+                  className="text-lg text-primary font-bold hover:text-primary transition-colors"
+                  onClick={onClose}
+                >
+                  My Service
+                </Link>
+              )}
+
               {isAuthenticated ? (
                 <>
                   <div className="pt-4 border-t border-border-gray">
-                    <p className="text-sm text-text-gray mb-4">{user?.email}</p>
-                    <button
-                      onClick={() => {
-                        onLogout();
-                        onClose();
-                      }}
-                      className="w-full btn btn-secondary"
-                    >
-                      Logout
-                    </button>
+                    <Link to="/profile" className="block w-full btn btn-secondary" onClick={onClose}>
+                      Profile
+                    </Link>
                   </div>
                 </>
               ) : (

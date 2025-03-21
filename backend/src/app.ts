@@ -3,6 +3,13 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth";
+import serviceRoutes from "./routes/services";
+import { auth } from "./middleware/auth";
+
+// Extended request interface with user property
+interface AuthRequest extends Request {
+  user?: any;
+}
 
 dotenv.config();
 
@@ -24,6 +31,12 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/services", serviceRoutes);
+
+// Protected route example
+app.get("/api/protected", auth, (req: AuthRequest, res: Response) => {
+  res.json({ message: "This is a protected route", user: req.user });
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello, TypeScript with Express!");
