@@ -4,6 +4,8 @@ import bcrypt from "bcryptjs";
 export interface IUser extends Document {
   email: string;
   password: string;
+  isAdmin: boolean;
+  isBanned: boolean;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -26,6 +28,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: 6,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    isBanned: {
+      type: Boolean,
+      default: false,
     },
   },
   {

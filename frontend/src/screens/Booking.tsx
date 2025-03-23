@@ -185,12 +185,8 @@ const Booking = () => {
         }
       );
 
-      console.log("Service created:", response.data);
       setActiveService(response.data.service);
-      alert("Inspection request submitted! 🎉");
     } catch (err: any) {
-      console.error("Error submitting service request:", err);
-      // If the user already has an active service, show it
       if (err.response?.data?.activeService) {
         setActiveService(err.response.data.activeService);
       } else {

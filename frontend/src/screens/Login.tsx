@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -8,6 +8,15 @@ const Login: React.FC = () => {
   const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Check for ban messages when component mounts
+  useEffect(() => {
+    const banMessage = sessionStorage.getItem("banMessage");
+    if (banMessage) {
+      setError(banMessage);
+      sessionStorage.removeItem("banMessage");
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

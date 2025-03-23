@@ -52,6 +52,14 @@ router.post("/login", (async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // Check if user is banned
+    if (user.isBanned) {
+      return res.status(403).json({
+        error: "Your account has been banned",
+        isBanned: true,
+      });
+    }
+
     // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {

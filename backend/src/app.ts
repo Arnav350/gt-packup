@@ -4,7 +4,9 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth";
 import serviceRoutes from "./routes/services";
+import adminRoutes from "./routes/admin";
 import { auth } from "./middleware/auth";
+import { checkBanStatus } from "./middleware/checkBanStatus";
 
 // Extended request interface with user property
 interface AuthRequest extends Request {
@@ -31,10 +33,11 @@ mongoose
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/services", serviceRoutes);
+app.use("/api/services", auth, checkBanStatus, serviceRoutes);
+app.use("/api/admin", auth, adminRoutes);
 
 // Protected route example
-app.get("/api/protected", auth, (req: AuthRequest, res: Response) => {
+app.get("/api/protected", auth, checkBanStatus, (req: AuthRequest, res: Response) => {
   res.json({ message: "This is a protected route", user: req.user });
 });
 

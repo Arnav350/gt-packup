@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 // Component imports
 import Home from "./screens/Home";
@@ -11,10 +12,11 @@ import Booking from "./screens/Booking";
 import Login from "./screens/Login";
 import Register from "./screens/Register";
 import Profile from "./screens/Profile";
+import Admin from "./screens/Admin";
 import MobileNav from "./components/MobileNav";
 
 function App() {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, isAdmin } = useAuth();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const renderAuthButtons = () => {
@@ -69,6 +71,11 @@ function App() {
                     My Service
                   </Link>
                 )}
+                {isAuthenticated && isAdmin && (
+                  <Link to="/admin" className="nav-link text-red-600 font-bold">
+                    Admin
+                  </Link>
+                )}
                 {renderAuthButtons()}
               </div>
 
@@ -113,6 +120,14 @@ function App() {
                 <ProtectedRoute>
                   <Profile />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <Admin />
+                </AdminRoute>
               }
             />
           </Routes>

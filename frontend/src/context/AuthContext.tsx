@@ -6,6 +6,8 @@ const API_URL = process.env.REACT_APP_API_URL || "";
 export interface User {
   _id: string;
   email: string;
+  isAdmin: boolean;
+  isBanned?: boolean;
 }
 
 export interface AuthContextType {
@@ -14,6 +16,7 @@ export interface AuthContextType {
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   token: string | null;
 }
 
@@ -23,6 +26,7 @@ export const AuthContext = createContext<AuthContextType>({
   register: async () => {},
   logout: () => {},
   isAuthenticated: false,
+  isAdmin: false,
   token: null,
 });
 
@@ -38,6 +42,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Handle ban detection and logout
+  const handleBanDetection = (error: any) => {
+    if (error.response?.status === 403 && error.response?.data?.isBanned) {
+      // Store ban message in session storage to display after redirect
+      sessionStorage.setItem("banMessage", "Your account has been banned");
+
+      // Force logout the banned user
+      logout();
+
+      // Redirect to login page
+      window.location.href = "/login";
+      return true;
+    }
+    return false;
+  };
+
+  // Set up axios interceptor to catch ban responses
+  useEffect(() => {
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (!handleBanDetection(error)) {
+          return Promise.reject(error);
+        }
+        return new Promise(() => {});
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptor);
+    };
+  }, []);
 
   useEffect(() => {
     // Check if user is stored in localStorage
@@ -67,6 +104,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
     } catch (error: any) {
+      // Handle ban errors specifically
+      if (error.response?.status === 403 && error.response?.data?.isBanned) {
+        throw new Error("Your account has been banned");
+      }
       throw new Error(error.response?.data?.error || "Login failed");
     }
   };
@@ -105,6 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         register,
         logout,
         isAuthenticated: !!user,
+        isAdmin: user?.isAdmin || false,
         token,
       }}
     >
