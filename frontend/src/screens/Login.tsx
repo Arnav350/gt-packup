@@ -6,6 +6,7 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -20,13 +21,18 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isLoading) return; // Prevent multiple submissions
+
     setError("");
+    setIsLoading(true);
 
     try {
       await login(email, password);
       navigate("/");
     } catch (err: any) {
       setError(err.message);
+      setIsLoading(false);
     }
   };
 
@@ -50,6 +56,7 @@ const Login: React.FC = () => {
               placeholder="Enter your @gatech.edu email"
               className="form-input"
               required
+              disabled={isLoading}
             />
             <span className="text-xs text-text-gray mt-1 block">Must be a @gatech.edu email</span>
           </div>
@@ -66,14 +73,18 @@ const Login: React.FC = () => {
               placeholder="Enter your password"
               className="form-input"
               required
+              disabled={isLoading}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-opacity-90 transition-all"
+            disabled={isLoading}
+            className={`w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg transition-all ${
+              isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
+            }`}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 

@@ -7,11 +7,15 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isLoading) return; // Prevent multiple submissions
+
     setError("");
 
     // Validation
@@ -30,11 +34,14 @@ const Register: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
+
     try {
       await register(email, password);
       navigate("/");
     } catch (err: any) {
       setError(err.message);
+      setIsLoading(false);
     }
   };
 
@@ -58,6 +65,7 @@ const Register: React.FC = () => {
               placeholder="Enter your @gatech.edu email"
               className="form-input"
               required
+              disabled={isLoading}
             />
             <span className="text-xs text-text-gray mt-1 block">Must be a @gatech.edu email</span>
           </div>
@@ -74,6 +82,7 @@ const Register: React.FC = () => {
               placeholder="Create a password"
               className="form-input"
               required
+              disabled={isLoading}
             />
             <span className="text-xs text-text-gray mt-1 block">Minimum 6 characters</span>
           </div>
@@ -90,14 +99,18 @@ const Register: React.FC = () => {
               placeholder="Confirm your password"
               className="form-input"
               required
+              disabled={isLoading}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg hover:bg-opacity-90 transition-all"
+            disabled={isLoading}
+            className={`w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg transition-all ${
+              isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
+            }`}
           >
-            Register
+            {isLoading ? "Registering..." : "Register"}
           </button>
         </form>
 

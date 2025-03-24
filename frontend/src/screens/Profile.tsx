@@ -21,6 +21,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeService, setActiveService] = useState<ActiveService | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     const fetchActiveService = async () => {
@@ -47,6 +48,9 @@ const Profile = () => {
   }, [token]);
 
   const handleLogout = () => {
+    if (logoutLoading) return;
+
+    setLogoutLoading(true);
     logout();
     navigate("/");
   };
@@ -134,9 +138,12 @@ const Profile = () => {
           <div className="space-y-4">
             <button
               onClick={handleLogout}
-              className="w-full py-3 px-4 bg-black border border-border-gray text-white font-medium rounded-lg hover:bg-light-primary transition-all"
+              disabled={logoutLoading}
+              className={`w-full py-3 px-4 bg-black border border-border-gray text-white font-medium rounded-lg hover:bg-light-primary transition-all ${
+                logoutLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              Logout
+              {logoutLoading ? "Logging out..." : "Logout"}
             </button>
           </div>
         </div>
