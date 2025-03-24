@@ -47,7 +47,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-4rem)] px-4 py-12 bg-large-gray">
-      <div className="w-full max-w-lg min-w-[28rem] bg-white rounded-xl shadow-md p-8 md:p-10">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-md p-6 sm:p-8 md:p-10">
         <h2 className="text-2xl font-medium text-center mb-8 text-black">Create an Account</h2>
 
         {error && <div className="bg-light-primary text-error p-3 rounded-lg mb-6 text-sm">{error}</div>}

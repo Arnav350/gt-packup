@@ -64,10 +64,10 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose, isAuthenticated,
                 </>
               ) : (
                 <div className="pt-4 border-t border-border-gray">
-                  <Link to="/login" className="block w-full btn btn-secondary mb-2" onClick={onClose}>
+                  <Link to="/login" className="w-full btn btn-secondary mb-2" onClick={onClose}>
                     Login
                   </Link>
-                  <Link to="/register" className="block w-full btn btn-primary" onClick={onClose}>
+                  <Link to="/register" className="w-full btn btn-primary" onClick={onClose}>
                     Register
                   </Link>
                 </div>
