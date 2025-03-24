@@ -41,11 +41,6 @@ router.post("/login", (async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    // Validate email domain
-    if (!email.endsWith("@gatech.edu")) {
-      return res.status(400).json({ error: "Only @gatech.edu email addresses are allowed" });
-    }
-
     // Find user
     const user = await User.findOne({ email });
     if (!user) {

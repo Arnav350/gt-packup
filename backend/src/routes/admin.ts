@@ -30,6 +30,55 @@ router.get("/services", (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
+// Update service
+router.put("/services/:id", (async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { package: packageName, status, address, address_extra, phone } = req.body;
+
+    const service = await Service.findById(id);
+
+    if (!service) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    const updatedService = await Service.findByIdAndUpdate(
+      id,
+      {
+        package: packageName,
+        status,
+        address,
+        address_extra,
+        phone,
+      },
+      { new: true }
+    ).populate("user_id", "email");
+
+    res.json(updatedService);
+  } catch (error) {
+    res.status(500).json({ error: "Error updating service" });
+  }
+}) as RequestHandler);
+
+// Delete service
+router.delete("/services/:id", (async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const service = await Service.findById(id);
+
+    if (!service) {
+      return res.status(404).json({ error: "Service not found" });
+    }
+
+    await Service.findByIdAndDelete(id);
+
+    res.json({ message: "Service deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting service" });
+  }
+}) as RequestHandler);
+
 // Ban/unban user
 router.put("/users/:id/ban", (async (req: Request, res: Response) => {
   try {

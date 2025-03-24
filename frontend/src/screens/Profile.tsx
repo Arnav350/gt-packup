@@ -62,39 +62,39 @@ const Profile = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Your Profile</h1>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Your Profile</h1>
 
-      <div className="bg-white p-8 rounded-xl shadow-md border border-border-gray mb-8 min-w-[28rem]">
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Account Information</h2>
+      <div className="bg-white p-4 sm:p-8 rounded-xl shadow-md border border-border-gray mb-8">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Account Information</h2>
           <div className="space-y-4">
             <div>
               <p className="text-sm text-text-gray">Email</p>
-              <p className="text-lg font-medium">{user?.email}</p>
+              <p className="text-base sm:text-lg font-medium">{user?.email}</p>
             </div>
             <div>
               <p className="text-sm text-text-gray">Account Type</p>
-              <p className="text-lg font-medium">Georgia Tech Student</p>
+              <p className="text-base sm:text-lg font-medium">Georgia Tech Student</p>
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="border-t border-border-gray pt-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Current Service</h2>
+          <div className="border-t border-border-gray pt-6 mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Current Service</h2>
             <Skeleton count={3} height={24} className="mb-2" />
           </div>
         ) : activeService ? (
-          <div className="border-t border-border-gray pt-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Current Service</h2>
-            <div className="p-4 bg-light-primary rounded-lg mb-4">
-              <div className="flex justify-between items-start">
+          <div className="border-t border-border-gray pt-6 mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Current Service</h2>
+            <div className="p-3 sm:p-4 bg-light-primary rounded-lg mb-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
                 <div>
                   <p className="font-medium text-primary">{activeService.package}</p>
                   <p className="text-text-gray mt-1">{getStatusText(activeService.status)}</p>
                 </div>
-                <span className="inline-block px-3 py-1 bg-white text-primary rounded-full text-sm font-medium border border-primary">
+                <span className="inline-block px-3 py-1 bg-white text-primary rounded-full text-sm font-medium border border-primary self-start">
                   {activeService.status}
                 </span>
               </div>
@@ -117,8 +117,8 @@ const Profile = () => {
             </Link>
           </div>
         ) : (
-          <div className="border-t border-border-gray pt-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Current Service</h2>
+          <div className="border-t border-border-gray pt-6 mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Current Service</h2>
             <p className="text-text-gray mb-4">You don't have any active service requests.</p>
             <Link
               to="/pricing"
@@ -130,7 +130,7 @@ const Profile = () => {
         )}
 
         <div className="border-t border-border-gray pt-6">
-          <h2 className="text-xl font-semibold mb-4">Account Actions</h2>
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Account Actions</h2>
           <div className="space-y-4">
             <button
               onClick={handleLogout}

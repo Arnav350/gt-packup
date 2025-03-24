@@ -144,22 +144,23 @@ const Booking = () => {
   const handleCancel = async () => {
     if (!activeService) return;
 
-    setIsCancelling(true);
-    try {
-      await axios.delete(`${API_URL}/api/services/${activeService._id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    if (window.confirm("Are you sure you want to cancel your service request?")) {
+      setIsCancelling(true);
+      try {
+        await axios.delete(`${API_URL}/api/services/${activeService._id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      setActiveService(null);
-      alert("Service cancelled successfully");
-      navigate("/");
-    } catch (err: any) {
-      console.error("Error cancelling service:", err);
-      alert("Failed to cancel service: " + (err.response?.data?.error || "Unknown error"));
-    } finally {
-      setIsCancelling(false);
+        setActiveService(null);
+        navigate("/");
+      } catch (err: any) {
+        console.error("Error cancelling service:", err);
+        alert("Failed to cancel service: " + (err.response?.data?.error || "Unknown error"));
+      } finally {
+        setIsCancelling(false);
+      }
     }
   };
 

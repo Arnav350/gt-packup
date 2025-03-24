@@ -36,6 +36,15 @@ const Admin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<View>("users");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [currentService, setCurrentService] = useState<ServiceData | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    package: "",
+    status: "",
+    address: "",
+    address_extra: "",
+    phone: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -95,6 +104,74 @@ const Admin: React.FC = () => {
       );
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to update user ban status");
+    }
+  };
+
+  const openEditModal = (service: ServiceData) => {
+    setCurrentService(service);
+    setEditFormData({
+      package: service.package,
+      status: service.status,
+      address: service.address,
+      address_extra: service.address_extra || "",
+      phone: service.phone,
+    });
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setCurrentService(null);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditFormData({
+      ...editFormData,
+      [name]: value,
+    });
+  };
+
+  const updateService = async (serviceId: string) => {
+    try {
+      await axios.put(`${API_URL}/api/admin/services/${serviceId}`, editFormData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Update local state
+      setServices(
+        services.map((service) =>
+          service._id === serviceId
+            ? {
+                ...service,
+                ...editFormData,
+              }
+            : service
+        )
+      );
+
+      closeEditModal();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to update service");
+    }
+  };
+
+  const deleteService = async (serviceId: string) => {
+    if (window.confirm("Are you sure you want to delete this service?")) {
+      try {
+        await axios.delete(`${API_URL}/api/admin/services/${serviceId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Update local state
+        setServices(services.filter((service) => service._id !== serviceId));
+      } catch (err: any) {
+        setError(err.response?.data?.error || "Failed to delete service");
+      }
     }
   };
 
@@ -168,12 +245,13 @@ const Admin: React.FC = () => {
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
         {services.map((service) => (
           <tr key={service._id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{service.user_id.email}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{service.user_id?.email}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{service.package}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
@@ -194,6 +272,14 @@ const Admin: React.FC = () => {
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{service.phone}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {new Date(service.createdAt).toLocaleDateString()}
+            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+              <button onClick={() => openEditModal(service)} className="text-indigo-600 hover:text-indigo-900 mr-2">
+                Edit
+              </button>
+              <button onClick={() => deleteService(service._id)} className="text-red-600 hover:text-red-900">
+                Delete
+              </button>
             </td>
           </tr>
         ))}
@@ -242,6 +328,89 @@ const Admin: React.FC = () => {
           <div className="overflow-x-auto">{activeView === "users" ? renderUsersTable() : renderServicesTable()}</div>
         )}
       </div>
+
+      {/* Edit Service Modal */}
+      {editModalOpen && currentService && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-xl font-semibold mb-4">Edit Service</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Package</label>
+                <select
+                  name="package"
+                  value={editFormData.package}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                >
+                  <option value="PackUp">PackUp</option>
+                  <option value="Secure Store">Secure Store</option>
+                  <option value="Full Move">Full Move</option>
+                  <option value="Custom Plan">Custom Plan</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <select
+                  name="status"
+                  value={editFormData.status}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                >
+                  <option value="Created">Created</option>
+                  <option value="Checked">Checked</option>
+                  <option value="Confirmed">Confirmed</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={editFormData.address}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Address Extra</label>
+                <input
+                  type="text"
+                  name="address_extra"
+                  value={editFormData.address_extra}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Phone</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={editFormData.phone}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={closeEditModal}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => updateService(currentService._id)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

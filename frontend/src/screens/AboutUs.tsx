@@ -48,6 +48,7 @@ const AboutUs = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-semibold mb-4">Contact</h2>
           <p>Phone Number: 407-574-7000</p>
+          <p>Email: apatel3018@gatech.edu</p>
         </div>
       </section>
     </div>

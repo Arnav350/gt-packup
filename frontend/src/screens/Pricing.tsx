@@ -9,7 +9,7 @@ const Pricing = () => {
   const plans = [
     {
       name: "PackUp",
-      price: "$80",
+      price: "$90",
       description: "Perfect for students who need help packing and unpacking",
       features: [
         "Professional packing assistance",
@@ -23,7 +23,7 @@ const Pricing = () => {
     },
     {
       name: "Secure Store",
-      price: "$325",
+      price: "$425",
       description: "Ideal for pre-packed items needing storage over break",
       features: [
         "Pickup from your location",
@@ -38,7 +38,7 @@ const Pricing = () => {
     },
     {
       name: "Full Move",
-      price: "$425",
+      price: "$525",
       description: "Complete end-to-end solution",
       features: [
         "Professional packing service",

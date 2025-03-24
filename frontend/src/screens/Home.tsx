@@ -8,12 +8,12 @@ const Home = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <section className="text-center py-16 max-w-3xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-black bg-clip-text text-transparent leading-tight pb-1">
+        <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-black bg-clip-text text-transparent leading-tight pb-2">
           Your GT Storage Solution
         </h1>
         <p className="text-xl text-text-gray mb-8 max-w-2xl mx-auto">
-          Seamlessly connect with Georgia Tech students to store your belongings during breaks. Safe, affordable, and
-          hassle-free storage solutions.
+          Affordable and reliable storage for Georgia Tech students — transport, store, and move your belongings with
+          ease over summer break.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/pricing" className="btn btn-primary inline-flex items-center justify-center px-8">
