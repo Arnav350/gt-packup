@@ -43,24 +43,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Handle ban detection and logout
-  const handleBanDetection = (error: any) => {
-    if (error.response?.status === 403 && error.response?.data?.isBanned) {
-      // Store ban message in session storage to display after redirect
-      sessionStorage.setItem("banMessage", "Your account has been banned");
-
-      // Force logout the banned user
-      logout();
-
-      // Redirect to login page
-      window.location.href = "/login";
-      return true;
-    }
-    return false;
-  };
-
-  // Set up axios interceptor to catch ban responses
   useEffect(() => {
+    // Handle ban detection and logout
+    const handleBanDetection = (error: any) => {
+      if (error.response?.status === 403 && error.response?.data?.isBanned) {
+        // Store ban message in session storage to display after redirect
+        sessionStorage.setItem("banMessage", "Your account has been banned");
+
+        // Force logout the banned user
+        logout();
+
+        // Redirect to login page
+        window.location.href = "/login";
+        return true;
+      }
+      return false;
+    };
+
     const interceptor = axios.interceptors.response.use(
       (response) => response,
       (error) => {
