@@ -117,12 +117,16 @@ const Home = () => {
               </li>
               <li className="flex items-center">
                 <span className="text-green-500 mr-2">✓</span>
-                Convenient delivery
+                Insurance provided
+              </li>
+              <li className="flex items-center">
+                <span className="text-green-500 mr-2">✓</span>
+                No effort needed
               </li>
             </ul>
             <div className="mt-8 text-center">
               <p className="text-2xl font-bold text-primary">Avg. cost $438</p>
-              <p className="text-sm text-text-gray">Per month, all-inclusive</p>
+              <p className="text-sm text-text-gray">All-inclusive</p>
             </div>
           </div>
         </div>
