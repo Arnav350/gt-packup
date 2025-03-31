@@ -105,7 +105,13 @@ const Pricing = () => {
 
   const handlePlanSelect = (plan: any) => {
     if (!user) {
-      navigate("/login");
+      navigate("/register", {
+        state: {
+          fromPricing: true,
+          planName: plan.name,
+          price: plan.price,
+        },
+      });
       return;
     }
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Register: React.FC = () => {
@@ -10,6 +10,14 @@ const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromPricing = location.state?.fromPricing;
+  const planInfo = location.state
+    ? {
+        planName: location.state.planName,
+        price: location.state.price,
+      }
+    : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +46,12 @@ const Register: React.FC = () => {
 
     try {
       await register(email, password);
-      navigate("/");
+      // If user came from pricing, redirect to booking with plan info
+      if (fromPricing && planInfo) {
+        navigate("/booking", { state: planInfo });
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       setError(err.message);
       setIsLoading(false);

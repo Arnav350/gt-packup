@@ -1,10 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 const Home = () => {
-  const { isAuthenticated } = useAuth();
-
   return (
     <div className="container mx-auto px-4 py-4">
       <section className="text-center py-4 max-w-3xl mx-auto">
@@ -19,11 +16,6 @@ const Home = () => {
           <Link to="/pricing" className="btn btn-primary inline-flex items-center justify-center px-8">
             Find Storage Space
           </Link>
-          {!isAuthenticated && (
-            <Link to="/register" className="btn btn-secondary inline-flex items-center justify-center px-8">
-              Register
-            </Link>
-          )}
         </div>
       </section>
 
