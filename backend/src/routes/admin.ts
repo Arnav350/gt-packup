@@ -104,4 +104,28 @@ router.put("/users/:id/ban", (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
+// Delete user
+router.delete("/users/:id", (async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Don't allow deleting admin users
+    if (user.isAdmin) {
+      return res.status(400).json({ error: "Cannot delete an admin user" });
+    }
+
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Error deleting user" });
+  }
+}) as RequestHandler);
+
 export default router;

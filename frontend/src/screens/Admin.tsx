@@ -107,6 +107,23 @@ const Admin: React.FC = () => {
     }
   };
 
+  const deleteUser = async (userId: string) => {
+    if (window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+      try {
+        await axios.delete(`${API_URL}/api/admin/users/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Update local state
+        setUsers(users.filter((user) => user._id !== userId));
+      } catch (err: any) {
+        setError(err.response?.data?.error || "Failed to delete user");
+      }
+    }
+  };
+
   const openEditModal = (service: ServiceData) => {
     setCurrentService(service);
     setEditFormData({
@@ -219,14 +236,19 @@ const Admin: React.FC = () => {
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
               {!user.isAdmin && (
-                <button
-                  onClick={() => toggleBanStatus(user._id, user.isBanned)}
-                  className={`text-sm ${
-                    user.isBanned ? "text-green-600 hover:text-green-900" : "text-red-600 hover:text-red-900"
-                  }`}
-                >
-                  {user.isBanned ? "Unban User" : "Ban User"}
-                </button>
+                <>
+                  <button
+                    onClick={() => toggleBanStatus(user._id, user.isBanned)}
+                    className={`text-sm ${
+                      user.isBanned ? "text-green-600 hover:text-green-900" : "text-red-600 hover:text-red-900"
+                    }`}
+                  >
+                    {user.isBanned ? "Unban User" : "Ban User"}
+                  </button>
+                  <button onClick={() => deleteUser(user._id)} className="text-sm text-red-600 hover:text-red-900 ml-2">
+                    Delete User
+                  </button>
+                </>
               )}
             </td>
           </tr>
