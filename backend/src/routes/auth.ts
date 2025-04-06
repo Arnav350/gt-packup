@@ -7,21 +7,16 @@ const router = express.Router();
 // Register route
 router.post("/register", (async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
-
-    // Validate email domain
-    if (!email.endsWith("@gatech.edu")) {
-      return res.status(400).json({ error: "Only @gatech.edu email addresses are allowed" });
-    }
+    const { fullName, phoneNumber } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ phoneNumber });
     if (existingUser) {
-      return res.status(400).json({ error: "Email already registered" });
+      return res.status(400).json({ error: "Phone number already registered" });
     }
 
     // Create new user
-    const user = new User({ email, password });
+    const user = new User({ fullName, phoneNumber });
     await user.save();
 
     // Generate token
@@ -39,10 +34,10 @@ router.post("/register", (async (req: Request, res: Response) => {
 // Login route
 router.post("/login", (async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { phoneNumber } = req.body;
 
     // Find user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ phoneNumber });
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -53,12 +48,6 @@ router.post("/login", (async (req: Request, res: Response) => {
         error: "Your account has been banned",
         isBanned: true,
       });
-    }
-
-    // Check password
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     // Generate token

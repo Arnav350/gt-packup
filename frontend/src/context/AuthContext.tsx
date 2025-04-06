@@ -1,20 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { auth } from "../config/firebase";
+import { onAuthStateChanged, User as FirebaseUser, signOut } from "firebase/auth";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
 
 export interface User {
   _id: string;
-  email: string;
+  phoneNumber: string;
+  fullName: string;
   isAdmin: boolean;
   isBanned?: boolean;
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  firebaseUser: FirebaseUser | null;
+  login: (phoneNumber: string) => Promise<void>;
+  register: (fullName: string, phoneNumber: string) => Promise<void>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isAdmin: boolean;
   token: string | null;
@@ -22,9 +26,10 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
+  firebaseUser: null,
   login: async () => {},
   register: async () => {},
-  logout: () => {},
+  logout: async () => {},
   isAuthenticated: false,
   isAdmin: false,
   token: null,
@@ -40,6 +45,7 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -76,77 +82,83 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
+    // Listen for Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setFirebaseUser(firebaseUser);
 
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
-    }
+      if (firebaseUser) {
+        try {
+          // Get the user data from our backend
+          const response = await axios.get(`${API_URL}/api/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${await firebaseUser.getIdToken()}`,
+            },
+          });
 
-    setLoading(false);
+          const { user } = response.data;
+          setUser(user);
+
+          // Store user in localStorage
+          localStorage.setItem("user", JSON.stringify(user));
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+          localStorage.removeItem("user");
+        }
+      } else {
+        setUser(null);
+        localStorage.removeItem("user");
+      }
+
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (phoneNumber: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
-        email,
-        password,
-      });
-
-      const { user, token } = response.data;
-      setUser(user);
-      setToken(token);
-
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
+      // The actual login is handled by Firebase in the Login component
+      // This function is just a placeholder to maintain the interface
+      // The real authentication happens through Firebase phone auth
     } catch (error: any) {
-      // Handle ban errors specifically
-      if (error.response?.status === 403 && error.response?.data?.isBanned) {
-        throw new Error("Your account has been banned");
-      }
-      throw new Error(error.response?.data?.error || "Login failed");
+      throw new Error(error.message || "Login failed");
     }
   };
 
-  const register = async (email: string, password: string) => {
+  const register = async (fullName: string, phoneNumber: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
-        email,
-        password,
-      });
-
-      const { user, token } = response.data;
-      setUser(user);
-      setToken(token);
-
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
+      // The actual registration is handled by Firebase in the Register component
+      // This function is just a placeholder to maintain the interface
+      // The real authentication happens through Firebase phone auth
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Registration failed");
+      throw new Error(error.message || "Registration failed");
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setFirebaseUser(null);
+      localStorage.removeItem("user");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        firebaseUser,
         login,
         register,
         logout,
-        isAuthenticated: !!user,
+        isAuthenticated: !!firebaseUser,
         isAdmin: user?.isAdmin || false,
-        token,
+        token: firebaseUser ? firebaseUser.uid : null,
       }}
     >
       {!loading && children}
