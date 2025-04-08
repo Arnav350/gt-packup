@@ -98,4 +98,23 @@ router.put("/users/:id/ban", ((req, res) => __awaiter(void 0, void 0, void 0, fu
         res.status(500).json({ error: "Error updating user ban status" });
     }
 })));
+// Delete user
+router.delete("/users/:id", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id } = req.params;
+        const user = yield User_1.User.findById(id);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        // Don't allow deleting admin users
+        if (user.isAdmin) {
+            return res.status(400).json({ error: "Cannot delete an admin user" });
+        }
+        yield User_1.User.findByIdAndDelete(id);
+        res.json({ message: "User deleted successfully" });
+    }
+    catch (error) {
+        res.status(500).json({ error: "Error deleting user" });
+    }
+})));
 exports.default = router;

@@ -29,10 +29,6 @@ const serviceSchema = new mongoose_1.default.Schema({
     address_extra: {
         type: String,
     },
-    phone: {
-        type: String,
-        required: true,
-    },
 }, {
     timestamps: true,
 });

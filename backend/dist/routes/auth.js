@@ -15,42 +15,73 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = require("../models/User");
+const twilio_1 = require("../utils/twilio");
 const router = express_1.default.Router();
-// Register route
+// Start registration route
 router.post("/register", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = req.body;
-        // Validate email domain
-        if (!email.endsWith("@gatech.edu")) {
-            return res.status(400).json({ error: "Only @gatech.edu email addresses are allowed" });
-        }
+        const { phone, fullName } = req.body;
         // Check if user already exists
-        const existingUser = yield User_1.User.findOne({ email });
+        const existingUser = yield User_1.User.findOne({ phone });
         if (existingUser) {
-            return res.status(400).json({ error: "Email already registered" });
+            return res.status(400).json({ error: "Phone number already registered" });
         }
-        // Create new user
-        const user = new User_1.User({ email, password });
-        yield user.save();
-        // Generate token
-        const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET || "your-secret-key", { expiresIn: "24h" });
-        res.status(201).json({ user, token });
+        // Send verification code via SMS using Twilio
+        yield (0, twilio_1.sendVerificationCode)(phone);
+        res.status(200).json({ message: "Verification code sent" });
     }
     catch (error) {
-        if (error.name === "ValidationError") {
-            return res.status(400).json({ error: error.message });
+        res.status(400).json({ error: "Error starting registration" });
+    }
+})));
+// Complete registration and verify code route
+router.post("/verify", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { phone, code, fullName, isRegistration } = req.body;
+        // Verify the code using Twilio
+        const isValid = yield (0, twilio_1.verifyCode)(phone, code);
+        if (!isValid) {
+            return res.status(400).json({ error: "Invalid verification code" });
         }
-        res.status(400).json({ error: "Error creating user" });
+        if (isRegistration) {
+            // Double-check if user was created while verifying
+            const existingUser = yield User_1.User.findOne({ phone });
+            if (existingUser) {
+                return res.status(400).json({ error: "Phone number already registered" });
+            }
+            // Create new user after successful verification
+            const user = new User_1.User({
+                phone,
+                fullName,
+            });
+            yield user.save();
+            // Generate token
+            const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET || "", { expiresIn: "24h" });
+            res.json({ user, token });
+        }
+        else {
+            // Handle login verification
+            const user = yield User_1.User.findOne({ phone });
+            if (!user) {
+                return res.status(404).json({ error: "User not found" });
+            }
+            // Generate token
+            const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET || "", { expiresIn: "24h" });
+            res.json({ user, token });
+        }
+    }
+    catch (error) {
+        res.status(400).json({ error: "Error verifying code" });
     }
 })));
 // Login route
 router.post("/login", ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = req.body;
+        const { phone } = req.body;
         // Find user
-        const user = yield User_1.User.findOne({ email });
+        const user = yield User_1.User.findOne({ phone });
         if (!user) {
-            return res.status(401).json({ error: "Invalid credentials" });
+            return res.status(404).json({ error: "User not found" });
         }
         // Check if user is banned
         if (user.isBanned) {
@@ -59,14 +90,9 @@ router.post("/login", ((req, res) => __awaiter(void 0, void 0, void 0, function*
                 isBanned: true,
             });
         }
-        // Check password
-        const isMatch = yield user.comparePassword(password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-        // Generate token
-        const token = jsonwebtoken_1.default.sign({ userId: user._id }, process.env.JWT_SECRET || "", { expiresIn: "24h" });
-        res.json({ user, token });
+        // Send verification code via SMS using Twilio
+        yield (0, twilio_1.sendVerificationCode)(phone);
+        res.json({ message: "Verification code sent" });
     }
     catch (error) {
         res.status(400).json({ error: "Error logging in" });

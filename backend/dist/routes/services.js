@@ -15,13 +15,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const auth_1 = require("../middleware/auth");
 const Service_1 = require("../models/Service");
+const User_1 = require("../models/User");
 const router = express_1.default.Router();
 // Create a new service booking
 router.post("/", auth_1.auth, ((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { package: packageType, address, address_extra, phone } = req.body;
+        const { package: packageType, address, address_extra } = req.body;
         if (!req.user || !req.user.userId) {
             return res.status(401).json({ error: "Authentication required" });
+        }
+        // Get user's phone number
+        const user = yield User_1.User.findById(req.user.userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
         }
         // Check if user already has an active service
         const activeServices = yield Service_1.Service.find({
@@ -46,7 +52,6 @@ router.post("/", auth_1.auth, ((req, res) => __awaiter(void 0, void 0, void 0, f
             status: "Created",
             address,
             address_extra: address_extra || null,
-            phone,
         });
         yield service.save();
         res.status(201).json({ service });
