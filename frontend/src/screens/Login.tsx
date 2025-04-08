@@ -36,7 +36,7 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await login(phone);
+      await login(`+1${phone}`);
       setShowVerification(true);
     } catch (err: any) {
       setError(err.message);
@@ -54,7 +54,7 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await verifyCode(phone, verificationCode);
+      await verifyCode(`+1${phone}`, verificationCode);
       navigate("/");
     } catch (err: any) {
       setError(err.message);
@@ -75,21 +75,20 @@ const Login: React.FC = () => {
               <label htmlFor="phone" className="block mb-2 font-medium text-black">
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter your phone number"
-                className="form-input"
-                required
-                disabled={isLoading}
-              />
-              <span className="text-xs text-text-gray mt-1 block">
-                Enter your US phone number (no spaces or dashes)
-              </span>
+              <div className="bg-border-gray flex items-center rounded-lg">
+                <span className="mx-2">+1</span>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="1234567890"
+                  className="form-input flex-1"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
-
             <button
               type="submit"
               disabled={isLoading}

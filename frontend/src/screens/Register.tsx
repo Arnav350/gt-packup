@@ -28,7 +28,7 @@ const Register: React.FC = () => {
     setError("");
 
     // Basic phone validation
-    if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+    if (!/^\d{10}$/.test(phone)) {
       setError("Please enter a valid phone number");
       return;
     }
@@ -41,7 +41,7 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await register(phone, fullName);
+      await register(`+1${phone}`, fullName);
       setShowVerification(true);
     } catch (err: any) {
       setError(err.message);
@@ -59,7 +59,7 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await verifyCode(phone, verificationCode, fullName, true);
+      await verifyCode(`+1${phone}`, verificationCode, fullName, true);
       // If user came from pricing, redirect to booking with plan info
       if (fromPricing && planInfo) {
         navigate("/booking", { state: planInfo });
@@ -90,7 +90,7 @@ const Register: React.FC = () => {
                 id="fullName"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
+                placeholder="John Doe"
                 className="form-input"
                 required
                 disabled={isLoading}
@@ -101,19 +101,19 @@ const Register: React.FC = () => {
               <label htmlFor="phone" className="block mb-2 font-medium text-black">
                 Phone Number
               </label>
-              <input
-                type="tel"
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="Enter your phone number"
-                className="form-input"
-                required
-                disabled={isLoading}
-              />
-              <span className="text-xs text-text-gray mt-1 block">
-                Enter your phone number with country code (e.g., +1)
-              </span>
+              <div className="bg-border-gray flex items-center rounded-lg">
+                <span className="mx-2">+1</span>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="1234567890"
+                  className="form-input flex-1"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
             </div>
 
             <button

@@ -17,7 +17,7 @@ export const sendVerificationCode = async (phone: string) => {
   try {
     const verification = await client.verify.v2
       .services(serviceSid)
-      .verifications.create({ to: `+1${phone}`, channel: "sms" });
+      .verifications.create({ to: phone, channel: "sms" });
 
     return verification;
   } catch (error) {
@@ -30,7 +30,7 @@ export const verifyCode = async (phone: string, code: string) => {
   try {
     const verificationCheck = await client.verify.v2
       .services(serviceSid)
-      .verificationChecks.create({ to: `+1${phone}`, code });
+      .verificationChecks.create({ to: phone, code });
 
     return verificationCheck.status === "approved";
   } catch (error) {
