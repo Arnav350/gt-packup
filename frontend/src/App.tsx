@@ -24,7 +24,7 @@ function App() {
       return (
         <div className="flex items-center gap-4">
           <Link to="/profile" className="btn btn-primary w-14 rounded-full text-xl">
-            {user?.email.charAt(0).toUpperCase()}
+            {user?.fullName?.charAt(0).toUpperCase()}
           </Link>
         </div>
       );

@@ -14,7 +14,7 @@ const Pricing = () => {
 
   useEffect(() => {
     // Set the end date to 7 days from now
-    const endDate = new Date(2025, 3, 2);
+    const endDate = new Date(2025, 3, 14);
 
     const timer = setInterval(() => {
       const now = new Date();

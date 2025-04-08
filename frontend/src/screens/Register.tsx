@@ -3,12 +3,13 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Register: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuth();
+  const [showVerification, setShowVerification] = useState(false);
+  const { register, verifyCode } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const fromPricing = location.state?.fromPricing;
@@ -19,33 +20,46 @@ const Register: React.FC = () => {
       }
     : null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isLoading) return; // Prevent multiple submissions
+    if (isLoading) return;
 
     setError("");
 
-    // Validation
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    // Basic phone validation
+    if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+      setError("Please enter a valid phone number");
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
-    if (!email.endsWith("@gatech.edu")) {
-      setError("Please use your @gatech.edu email address");
+    if (!fullName.trim()) {
+      setError("Please enter your full name");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await register(email, password);
+      await register(phone, fullName);
+      setShowVerification(true);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isLoading) return;
+
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await verifyCode(phone, verificationCode, fullName, true);
       // If user came from pricing, redirect to booking with plan info
       if (fromPricing && planInfo) {
         navigate("/booking", { state: planInfo });
@@ -65,67 +79,83 @@ const Register: React.FC = () => {
 
         {error && <div className="bg-light-primary text-error p-3 rounded-lg mb-6 text-sm">{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label htmlFor="email" className="block mb-2 font-medium text-black">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your @gatech.edu email"
-              className="form-input"
-              required
-              disabled={isLoading}
-            />
-            <span className="text-xs text-text-gray mt-1 block">Must be a @gatech.edu email</span>
-          </div>
+        {!showVerification ? (
+          <form onSubmit={handleRegister}>
+            <div className="mb-6">
+              <label htmlFor="fullName" className="block mb-2 font-medium text-black">
+                Full Name
+              </label>
+              <input
+                type="text"
+                id="fullName"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Enter your full name"
+                className="form-input"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className="mb-6">
-            <label htmlFor="password" className="block mb-2 font-medium text-black">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              className="form-input"
-              required
-              disabled={isLoading}
-            />
-            <span className="text-xs text-text-gray mt-1 block">Minimum 6 characters</span>
-          </div>
+            <div className="mb-6">
+              <label htmlFor="phone" className="block mb-2 font-medium text-black">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Enter your phone number"
+                className="form-input"
+                required
+                disabled={isLoading}
+              />
+              <span className="text-xs text-text-gray mt-1 block">
+                Enter your phone number with country code (e.g., +1)
+              </span>
+            </div>
 
-          <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block mb-2 font-medium text-black">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              className="form-input"
-              required
+            <button
+              type="submit"
               disabled={isLoading}
-            />
-          </div>
+              className={`w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg transition-all ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
+              }`}
+            >
+              {isLoading ? "Sending code..." : "Send Verification Code"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerify}>
+            <div className="mb-6">
+              <label htmlFor="verificationCode" className="block mb-2 font-medium text-black">
+                Verification Code
+              </label>
+              <input
+                type="text"
+                id="verificationCode"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Enter the 6-digit code"
+                className="form-input"
+                required
+                disabled={isLoading}
+              />
+              <span className="text-xs text-text-gray mt-1 block">Enter the 6-digit code sent to your phone</span>
+            </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg transition-all ${
-              isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
-            }`}
-          >
-            {isLoading ? "Registering..." : "Register"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 px-4 bg-primary text-white font-semibold rounded-lg transition-all ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
+              }`}
+            >
+              {isLoading ? "Verifying..." : "Verify Code"}
+            </button>
+          </form>
+        )}
 
         <div className="mt-8 pt-6 border-t border-border-gray text-center">
           <span className="text-sm text-text-gray">Already have an account?</span>

@@ -93,7 +93,6 @@ const Booking = () => {
   const [formData, setFormData] = useState({
     address: "",
     addressDetails: "",
-    phone: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -176,7 +175,6 @@ const Booking = () => {
           package: selectedService,
           address: formData.address,
           address_extra: formData.addressDetails,
-          phone: formData.phone,
         },
         {
           headers: {
@@ -319,21 +317,6 @@ const Booking = () => {
             value={formData.addressDetails}
             onChange={(e) => setFormData({ ...formData, addressDetails: e.target.value })}
             className="form-input"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="phone" className="block mb-2 font-medium">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            placeholder="(123) 456-7890"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            className="form-input"
-            required
           />
         </div>
 

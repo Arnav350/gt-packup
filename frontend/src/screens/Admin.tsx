@@ -6,23 +6,25 @@ const API_URL = process.env.REACT_APP_API_URL || "";
 
 interface UserData {
   _id: string;
-  email: string;
+  phone: string;
+  fullName: string;
   isAdmin: boolean;
   isBanned: boolean;
   createdAt: string;
+  updatedAt: string;
 }
 
 interface ServiceData {
   _id: string;
   user_id: {
     _id: string;
-    email: string;
+    phone: string;
+    fullName: string;
   };
   package: string;
   status: string;
   address: string;
   address_extra?: string;
-  phone: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,7 +45,6 @@ const Admin: React.FC = () => {
     status: "",
     address: "",
     address_extra: "",
-    phone: "",
   });
 
   useEffect(() => {
@@ -131,7 +132,6 @@ const Admin: React.FC = () => {
       status: service.status,
       address: service.address,
       address_extra: service.address_extra || "",
-      phone: service.phone,
     });
     setEditModalOpen(true);
   };
@@ -196,7 +196,8 @@ const Admin: React.FC = () => {
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
@@ -206,7 +207,8 @@ const Admin: React.FC = () => {
       <tbody className="bg-white divide-y divide-gray-200">
         {users.map((user) => (
           <tr key={user._id} className={user.isBanned ? "bg-red-50" : ""}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.phone}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.fullName}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {user.isAdmin ? (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -265,7 +267,6 @@ const Admin: React.FC = () => {
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
@@ -273,7 +274,10 @@ const Admin: React.FC = () => {
       <tbody className="bg-white divide-y divide-gray-200">
         {services.map((service) => (
           <tr key={service._id}>
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{service.user_id?.email}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <div>{service.user_id?.fullName}</div>
+              <div className="text-xs text-gray-500">{service.user_id?.phone}</div>
+            </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{service.package}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
@@ -291,7 +295,6 @@ const Admin: React.FC = () => {
               {service.address}
               {service.address_extra && <div className="text-xs text-gray-400">{service.address_extra}</div>}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{service.phone}</td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               {new Date(service.createdAt).toLocaleDateString()}
             </td>
@@ -401,16 +404,6 @@ const Admin: React.FC = () => {
                   type="text"
                   name="address_extra"
                   value={editFormData.address_extra}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Phone</label>
-                <input
-                  type="text"
-                  name="phone"
-                  value={editFormData.phone}
                   onChange={handleInputChange}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 />

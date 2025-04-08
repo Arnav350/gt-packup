@@ -5,15 +5,17 @@ const API_URL = process.env.REACT_APP_API_URL || "";
 
 export interface User {
   _id: string;
-  email: string;
+  phone: string;
+  fullName: string;
   isAdmin: boolean;
   isBanned?: boolean;
 }
 
 export interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (phone: string, fullName: string) => Promise<void>;
+  verifyCode: (phone: string, code: string, fullName?: string, isRegistration?: boolean) => Promise<void>;
+  login: (phone: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
@@ -22,8 +24,9 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType>({
   user: null,
-  login: async () => {},
   register: async () => {},
+  verifyCode: async () => {},
+  login: async () => {},
   logout: () => {},
   isAuthenticated: false,
   isAdmin: false,
@@ -88,11 +91,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const register = async (phone: string, fullName: string) => {
     try {
-      const response = await axios.post(`${API_URL}/api/auth/login`, {
-        email,
-        password,
+      await axios.post(`${API_URL}/api/auth/register`, {
+        phone,
+        fullName,
+      });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || "Registration failed");
+    }
+  };
+
+  const verifyCode = async (phone: string, code: string, fullName?: string, isRegistration?: boolean) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/verify`, {
+        phone,
+        code,
+        fullName,
+        isRegistration,
       });
 
       const { user, token } = response.data;
@@ -102,31 +118,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Store user in localStorage
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || "Verification failed");
+    }
+  };
+
+  const login = async (phone: string) => {
+    try {
+      await axios.post(`${API_URL}/api/auth/login`, {
+        phone,
+      });
     } catch (error: any) {
       // Handle ban errors specifically
       if (error.response?.status === 403 && error.response?.data?.isBanned) {
         throw new Error("Your account has been banned");
       }
       throw new Error(error.response?.data?.error || "Login failed");
-    }
-  };
-
-  const register = async (email: string, password: string) => {
-    try {
-      const response = await axios.post(`${API_URL}/api/auth/register`, {
-        email,
-        password,
-      });
-
-      const { user, token } = response.data;
-      setUser(user);
-      setToken(token);
-
-      // Store user in localStorage
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", token);
-    } catch (error: any) {
-      throw new Error(error.response?.data?.error || "Registration failed");
     }
   };
 
@@ -141,8 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        login,
         register,
+        verifyCode,
+        login,
         logout,
         isAuthenticated: !!user,
         isAdmin: user?.isAdmin || false,

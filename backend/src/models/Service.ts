@@ -6,7 +6,6 @@ export interface IService extends Document {
   status: string;
   address: string;
   address_extra?: string;
-  phone: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,10 +34,6 @@ const serviceSchema = new mongoose.Schema(
     },
     address_extra: {
       type: String,
-    },
-    phone: {
-      type: String,
-      required: true,
     },
   },
   {

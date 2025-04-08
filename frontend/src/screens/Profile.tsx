@@ -74,12 +74,12 @@ const Profile = () => {
           <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Account Information</h2>
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-text-gray">Email</p>
-              <p className="text-base sm:text-lg font-medium">{user?.email}</p>
+              <p className="text-sm text-text-gray">Full Name</p>
+              <p className="text-base sm:text-lg font-medium">{user?.fullName}</p>
             </div>
             <div>
-              <p className="text-sm text-text-gray">Account Type</p>
-              <p className="text-base sm:text-lg font-medium">Georgia Tech Student</p>
+              <p className="text-sm text-text-gray">Phone Number</p>
+              <p className="text-base sm:text-lg font-medium">{user?.phone}</p>
             </div>
           </div>
         </div>

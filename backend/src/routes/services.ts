@@ -1,6 +1,7 @@
 import express, { Request, Response, RequestHandler } from "express";
 import { auth } from "../middleware/auth";
 import { Service } from "../models/Service";
+import { User } from "../models/User";
 import mongoose from "mongoose";
 
 interface AuthRequest extends Request {
@@ -12,10 +13,16 @@ const router = express.Router();
 // Create a new service booking
 router.post("/", auth, (async (req: AuthRequest, res: Response) => {
   try {
-    const { package: packageType, address, address_extra, phone } = req.body;
+    const { package: packageType, address, address_extra } = req.body;
 
     if (!req.user || !req.user.userId) {
       return res.status(401).json({ error: "Authentication required" });
+    }
+
+    // Get user's phone number
+    const user = await User.findById(req.user.userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Check if user already has an active service
@@ -44,7 +51,6 @@ router.post("/", auth, (async (req: AuthRequest, res: Response) => {
       status: "Created",
       address,
       address_extra: address_extra || null,
-      phone,
     });
 
     await service.save();
